@@ -18,7 +18,6 @@ async def _get_phone_success_predictions(
     """
     Get phone success predictions
     :param ids: List[1,2,3,4]
-    :param loop_:
     :return:
     """
     async with connect(loop=asyncio.get_event_loop()) as conn:
@@ -39,7 +38,6 @@ async def _get_contact_predictions(
     """
     Get contact predictions
     :param ids: List[1,2,3,4]
-    :param loop_:
     :return:
     """
     async with connect(loop=asyncio.get_event_loop()) as conn:
