@@ -1,19 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
 
-from db.config import engine, Base
-from routers import book_router
+import routers
 
 app = FastAPI()
-app.include_router(book_router.router)
-
-
-@app.on_event("startup")
-async def startup():
-    # create db tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+app.include_router(routers.router)
 
 
 if __name__ == '__main__':
