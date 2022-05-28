@@ -3,7 +3,6 @@ CLAIM_ID = 'ClaimID'
 
 class ContactInterface:
     @classmethod
-    @property
     def columns(cls):
         return ['ClaimID', 'PersonAge', 'PersonSex', 'PersonRegistrationRegionNumber', 'BriefCaseName', 'LoanClassName',
                 'ContractTerm', 'ContractAmount', 'OtlNalPointID', 'ContractRegion', 'ContractCity',
@@ -13,7 +12,6 @@ class ContactInterface:
 
 class SuccessInterface:
     @classmethod
-    @property
     def columns(cls):
         return ['ClaimID', 'PersonAge', 'PersonSex', 'PersonRegistrationRegionNumber', 'BriefCaseName', 'LoanClassName',
                 'ContractTerm', 'ContractAmount', 'OtlNalPointID', 'ContractRegion', 'ContractCity',
