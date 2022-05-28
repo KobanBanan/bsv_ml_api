@@ -12,16 +12,16 @@ dsn = 'Driver=SQL Server Native Client 11.0;Server=10.168.4.148;Database=ML;UID=
 connect = partial(aioodbc.connect, dsn=dsn, echo=True, autocommit=True)
 
 
-async def _get_phone_success_predictions(ids: List[int],
-        loop_: asyncio.windows_events.ProactorEventLoop = asyncio.get_event_loop(),
-        model: CatBoostClassifier = CatBoostClassifier().load_model('models/success.cbm')):
+async def _get_phone_success_predictions(
+        ids: List[int], model: CatBoostClassifier = CatBoostClassifier().load_model('models/success.cbm')
+):
     """
     Get phone success predictions
     :param ids: List[1,2,3,4]
     :param loop_:
     :return:
     """
-    async with connect(loop=loop_) as conn:
+    async with connect(loop=asyncio.get_event_loop()) as conn:
         async with conn.cursor() as cur:
             with open('sql/ContactPersonNotebook.sql') as f:
                 sql = f.read().format(tuple(ids))
@@ -33,16 +33,16 @@ async def _get_phone_success_predictions(ids: List[int],
                 CLAIM_ID).T.to_dict()
 
 
-async def _get_contact_predictions(ids: List[int],
-        loop_: asyncio.windows_events.ProactorEventLoop = asyncio.get_event_loop(),
-        model: CatBoostClassifier = CatBoostClassifier().load_model('models/contact.cbm')):
+async def _get_contact_predictions(
+        ids: List[int], model: CatBoostClassifier = CatBoostClassifier().load_model('models/contact.cbm')
+):
     """
     Get contact predictions
     :param ids: List[1,2,3,4]
     :param loop_:
     :return:
     """
-    async with connect(loop=loop_) as conn:
+    async with connect(loop=asyncio.get_event_loop()) as conn:
         async with conn.cursor() as cur:
             with open('sql/ContactPersonNotebook.sql') as f:
                 sql = f.read().format(tuple(ids))
