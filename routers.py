@@ -1,4 +1,5 @@
 from typing import List, Dict
+
 from fastapi import APIRouter
 
 from endpoints import _get_phone_success_predictions, _get_contact_predictions
