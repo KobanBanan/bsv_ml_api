@@ -28,8 +28,9 @@ async def _get_phone_success_predictions(
             await cur.execute(sql)
             val = await cur.fetchall()
 
-            return predict(pd.DataFrame.from_records(val, columns=SuccessInterface.columns()), model).set_index(
-                CLAIM_ID).T.to_dict()
+            return predict(
+                pd.DataFrame.from_records(val, columns=SuccessInterface.columns().dropna()), model
+            ).set_index(CLAIM_ID).T.to_dict()
 
 
 async def _get_contact_predictions(
@@ -48,5 +49,6 @@ async def _get_contact_predictions(
             await cur.execute(sql)
             val = await cur.fetchall()
 
-            return predict(pd.DataFrame.from_records(val, columns=ContactInterface.columns()), model).set_index(
-                CLAIM_ID).T.to_dict()
+            return predict(
+                pd.DataFrame.from_records(val, columns=ContactInterface.columns().dropna()), model
+            ).set_index(CLAIM_ID).T.to_dict()

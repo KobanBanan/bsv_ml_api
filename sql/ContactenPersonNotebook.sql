@@ -26,8 +26,13 @@ WITH BriefCaseData AS (SELECT DISTINCT bc.ClaimID,
 
                        FROM ML.reference.BriefCase bc
 
-                                LEFT JOIN ML.otlnal.CreditStrahMapping csm ON bc.StrahID = csm.StrahID
-                                LEFT JOIN ML.reference.BriefCase bc_cred ON csm.CreditID = bc_cred.CreditID)
+
+                                LEFT JOIN ML.otlnal.CreditStrahMapping csm
+                                          ON bc.StrahID = csm.StrahID
+                                LEFT JOIN ML.reference.BriefCase bc_cred ON csm.CreditID = bc_cred.CreditID
+
+                       WHERE bc.ClaimID IN {})
+
 
 SELECT bc.ClaimID,
        bc.PersonAge,
