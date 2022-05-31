@@ -50,5 +50,5 @@ async def _get_contact_predictions(
             val = await cur.fetchall()
 
             return predict(
-                pd.DataFrame.from_records(val, columns=ContactInterface.columns().dropna()), model
+                pd.DataFrame.from_records(val, columns=ContactInterface.columns()).dropna(), model
             ).set_index(CLAIM_ID).T.to_dict()
