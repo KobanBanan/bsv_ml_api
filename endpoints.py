@@ -22,7 +22,7 @@ async def _get_phone_success_predictions(
     """
     async with connect(loop=asyncio.get_event_loop()) as conn:
         async with conn.cursor() as cur:
-            with open('sql/ContactPersonNotebook.sql') as f:
+            with open('sql/ContactenPersonNotebook.sql') as f:
                 sql = f.read().format(tuple(ids))
 
             await cur.execute(sql)
