@@ -29,7 +29,7 @@ async def _get_phone_success_predictions(
             val = await cur.fetchall()
 
             return predict(
-                pd.DataFrame.from_records(val, columns=SuccessInterface.columns().dropna()), model
+                pd.DataFrame.from_records(val, columns=SuccessInterface.columns()).dropna(), model
             ).set_index(CLAIM_ID).T.to_dict()
 
 

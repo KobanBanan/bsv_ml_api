@@ -53,3 +53,8 @@ async def contact_predictions(ids: List[int]) -> Dict[str, Dict[str, float]]:
         }
     """
     return await _get_contact_predictions(ids)
+
+
+@router.get("/")
+async def ok():
+    return True
