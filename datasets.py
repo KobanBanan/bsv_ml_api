@@ -1,19 +1,31 @@
 CLAIM_ID = 'ClaimID'
+from dataclasses import dataclass
+from typing import List
+
+DEFAULT_COLUMNS = ['PersonID', 'PersonAge', 'PersonGenderMale', 'PersonRegionRegistrationNumber', 'PersonContractType',
+                   'MonthBetweenFirstLastContract', 'OurPersonContractCount', 'OurMinMaxContractAmountRatio',
+                   'OurMinMaxTotalDebtAmountRatio', 'BKILoanOverdueCountRatio', 'BKIDebtAmount', 'BKILastPaymentInfo']
 
 
-class ContactInterface:
-    @classmethod
-    def columns(cls):
-        return ['ClaimID', 'PersonAge', 'PersonSex', 'PersonRegistrationRegionNumber', 'BriefCaseName', 'LoanClassName',
-                'ContractTerm', 'ContractAmount', 'OtlNalPointID', 'ContractRegion', 'ContractCity',
-                'InitialCreditorType', 'TotalDebtAmount', 'BKILoanCount', 'BKILoanOverdueCount', 'BKIOrganizationCount',
-                'BKIDebtAmount']
+@dataclass
+class Phone30SecondsInterface:
+    columns: List[str]
+
+    def __post_init__(self):
+        self.columns = DEFAULT_COLUMNS
 
 
-class SuccessInterface:
-    @classmethod
-    def columns(cls):
-        return ['ClaimID', 'PersonAge', 'PersonSex', 'PersonRegistrationRegionNumber', 'BriefCaseName', 'LoanClassName',
-                'ContractTerm', 'ContractAmount', 'OtlNalPointID', 'ContractRegion', 'ContractCity',
-                'InitialCreditorType', 'TotalDebtAmount', 'BKILoanCount', 'BKILoanOverdueCount', 'BKIOrganizationCount',
-                'BKIDebtAmount']
+@dataclass
+class GivePromiseInterface:
+    columns: List[str]
+
+    def __post_init__(self):
+        self.columns = DEFAULT_COLUMNS
+
+
+@dataclass
+class KeepPromiseInterface:
+    columns: List[str]
+
+    def __post_init__(self):
+        self.columns = DEFAULT_COLUMNS
