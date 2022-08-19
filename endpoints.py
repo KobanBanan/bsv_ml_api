@@ -6,7 +6,7 @@ import aioodbc
 import pandas as pd
 from catboost import CatBoostClassifier
 
-from datasets import Phone30SecondsInterface, CLAIM_ID, KeepPromiseInterface, GivePromiseInterface
+from consts import DEFAULT_COLUMNS, PERSON_ID
 from utils import predict
 
 dsn = 'Driver=SQL Server Native Client 11.0;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++'
@@ -30,8 +30,8 @@ async def _get_30_seconds_predictions(
             val = await cur.fetchall()
 
             return predict(
-                pd.DataFrame.from_records(val, columns=Phone30SecondsInterface.columns).dropna(), model
-            ).set_index(CLAIM_ID).T.to_dict()
+                pd.DataFrame.from_records(val, columns=DEFAULT_COLUMNS).dropna(), model
+            ).set_index(PERSON_ID).T.to_dict()
 
 
 async def _get_give_promise_predictions(
@@ -51,8 +51,8 @@ async def _get_give_promise_predictions(
             val = await cur.fetchall()
 
             return predict(
-                pd.DataFrame.from_records(val, columns=GivePromiseInterface.columns).dropna(), model
-            ).set_index(CLAIM_ID).T.to_dict()
+                pd.DataFrame.from_records(val, columns=DEFAULT_COLUMNS).dropna(), model
+            ).set_index(PERSON_ID).T.to_dict()
 
 
 async def _get_keep_promise_predictions(
@@ -64,7 +64,6 @@ async def _get_keep_promise_predictions(
     :return:
     """
 
-    # TODO predict with _get_give_promise_predictions
     async with connect(loop=asyncio.get_event_loop()) as conn:
         async with conn.cursor() as cur:
             with open('sql/mkp.sql') as f:
@@ -73,6 +72,7 @@ async def _get_keep_promise_predictions(
             await cur.execute(sql)
             val = await cur.fetchall()
 
-            return predict(
-                pd.DataFrame.from_records(val, columns=KeepPromiseInterface.columns).dropna(), model
-            ).set_index(CLAIM_ID).T.to_dict()
+            df = pd.DataFrame.from_records(val, columns=DEFAULT_COLUMNS).dropna()
+            give_promise_predictions = await _get_give_promise_predictions(ids)
+            df['MGPProbeValue'] = df['PersonID'].apply(lambda x: give_promise_predictions.get(x, {}).get('1', 0))
+            return predict(df, model).set_index(PERSON_ID).T.to_dict()
