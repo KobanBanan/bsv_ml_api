@@ -1,17 +1,17 @@
 from typing import List, Dict
-
-from fastapi import APIRouter
-
+import pandas as pd
+from fastapi import APIRouter,UploadFile, File
+from io import BytesIO
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions
 
 router = APIRouter()
 
 
 @router.post("/phone_30_seconds_predictions/")
-async def phone_30_seconds_predictions(ids: List[int]) -> Dict[str, Dict[str, float]]:
+async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get phone success predictions
-    :param ids: List[35146,35208,35217,... n]
+    :param file: file
     :return: Predictions like
        {
           "35146": {
@@ -28,14 +28,17 @@ async def phone_30_seconds_predictions(ids: List[int]) -> Dict[str, Dict[str, fl
           }
         }
     """
-    return await _get_30_seconds_predictions(ids)
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+    return await _get_30_seconds_predictions(df['ClaimID'].tolist())
 
 
 @router.post("/give_promise_predictions/")
-async def give_promise_predictions(ids: List[int]) -> Dict[str, Dict[str, float]]:
+async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
-    :param ids: List[35146,35208,35217,... n]
+    :param file: excel file
     :return: Predictions like
        {
           "35146": {
@@ -52,14 +55,17 @@ async def give_promise_predictions(ids: List[int]) -> Dict[str, Dict[str, float]
           }
         }
     """
-    return await _get_give_promise_predictions(ids)
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+    return await _get_give_promise_predictions(df['ClaimID'].tolist())
 
 
 @router.post("/keep_promise_predictions/")
-async def keep_promise_predictions(ids: List[int]) -> Dict[str, Dict[str, float]]:
+async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
-    :param ids: List[35146,35208,35217,... n]
+    :param file:excel file
     :return: Predictions like
        {
           "35146": {
@@ -76,7 +82,10 @@ async def keep_promise_predictions(ids: List[int]) -> Dict[str, Dict[str, float]
           }
         }
     """
-    return await _get_keep_promise_predictions(ids)
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+    return await _get_keep_promise_predictions(df['ClaimID'].tolist())
 
 
 @router.get("/")
