@@ -90,8 +90,8 @@ async def _get_keep_promise_predictions(
             with open('sql/mkp.sql') as f:
                 sql = f.read()
 
-            ids = [[x] for x in ids]
-            await cur.executemany('INSERT INTO ML.buffer.ClaimListAPI (ClaimID) VALUES (?);', ids)
+            ids_ = [[x] for x in ids]
+            await cur.executemany('INSERT INTO ML.buffer.ClaimListAPI (ClaimID) VALUES (?);', ids_)
             await cur.execute(sql)
             val = await cur.fetchall()
 
