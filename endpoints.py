@@ -9,7 +9,7 @@ from catboost import CatBoostClassifier
 from consts import DEFAULT_COLUMNS, PERSON_ID
 from utils import predict
 
-dsn = 'Driver=SQL Server Native Client 11.0;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++'
+dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
 connect = partial(aioodbc.connect, dsn=dsn, echo=True, autocommit=True)
 
 
