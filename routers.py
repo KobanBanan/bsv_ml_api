@@ -3,12 +3,13 @@ import pandas as pd
 from fastapi import APIRouter,UploadFile, File
 from io import BytesIO
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions
+from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 
 
 @router.post("/phone_30_seconds_predictions/")
-async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
+async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> StreamingResponse:
     """
     Get phone success predictions
     :param file: file
