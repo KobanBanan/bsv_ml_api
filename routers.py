@@ -1,9 +1,12 @@
-from typing import List, Dict
-import pandas as pd
-from fastapi import APIRouter,UploadFile, File
 from io import BytesIO
-from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions
+from typing import Dict
+
+import pandas as pd
+from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
+
+from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
+    _convert_images
 
 router = APIRouter()
 
@@ -87,6 +90,15 @@ async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     buffer = BytesIO(contents)
     df = pd.read_excel(buffer, engine='openpyxl')
     return await _get_keep_promise_predictions(df['ClaimID'].tolist())
+
+
+@router.post("/convert_images/")
+async def convert_images(path_to_folder: str) -> Dict[str, Dict[str, float]]:
+    """
+    Get contact prediction
+    :param path_to_folder: full path to folder
+    """
+    return await _convert_images(path_to_folder)
 
 
 @router.get("/")

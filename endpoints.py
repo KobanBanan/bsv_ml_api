@@ -1,12 +1,19 @@
 import asyncio
+import datetime
 import io
+import os
+import random
+import shutil
 from functools import partial, wraps
+from pathlib import Path
 from typing import List
 
 import aioodbc
 import pandas as pd
+from PIL import Image, UnidentifiedImageError
 from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
+from tqdm import tqdm
 
 from consts import DEFAULT_COLUMNS
 from utils import predict, batch_iterable
@@ -140,3 +147,80 @@ async def _get_keep_promise_predictions(
             df['MGPProbeValue'] = df['PersonID'].apply(lambda x: give_promise_predictions.get(x, {}).get('1', 0))
             print('Predicting')
             return predict(df, model)
+
+
+async def _convert_images(image_path: str):
+    """
+    Convert images to jpeg in given folder
+    :param image_path: full path to images
+    :return:
+    """
+    def get_date():
+        year = str(datetime.datetime.now().year)
+        month = str(datetime.datetime.now().month)
+        day = str(datetime.datetime.now().day)
+
+        minute = str(datetime.datetime.now().minute)
+        second = str(datetime.datetime.now().second)
+        return day + '_' + month + '_' + year + ' ' + minute + ':' + second
+
+    path = Path(image_path)
+    path_to_root_folder = str(path.parent.absolute())
+    path_to_original_images = os.path.join(path_to_root_folder, 'original')
+
+    file_paths = []
+    for path, subdirs, files in os.walk(image_path):
+        for name in files:
+            file_paths.append(os.path.join(path, name))
+
+    logs_path = os.path.join(path_to_root_folder, 'logs')
+    os.makedirs(logs_path, exist_ok=True)
+    os.makedirs(path_to_original_images, exist_ok=True)
+
+    pass_logs = {'Дата обработки': [], 'Путь к файлу': [], 'Исходное имя': [], 'Конечное имя': []}
+    transform_logs = {'Дата обработки': [], 'Исходный путь': [], 'Формат исходного файла': [], 'Конечный путь': []}
+    error_logs = {'Дата обработки': [], 'Исходный путь': []}
+
+    for path in tqdm(file_paths):
+        try:
+            name_path, extension = os.path.splitext(path)
+            old_name = path.split('/')[-1]
+
+            new_path = name_path + '.jpg'
+
+            if new_path in file_paths and extension != '.jpg':
+                new_path = name_path + '_' + str(random.randint(1000, 9999)) + '.jpg'
+
+            img = Image.open(path)
+
+            if img.format not in ('JPEG', 'TIFF', 'GIF'):
+                date = get_date()
+                error_logs['Дата обработки'].append(date)
+                error_logs['Исходный путь'].append(path)
+                continue
+
+            img.convert('RGB').save(new_path, "JPEG", quality=100)
+            img.close()
+
+            if extension != '.jpg':
+                shutil.move(path, path_to_original_images)
+                # os.remove(path)
+
+            new_name = new_path.split('/')[-1]
+            date = get_date()
+
+            if img.format == 'JPEG':
+                for col, value in zip(pass_logs.keys(), (date, path, old_name, new_name)):
+                    pass_logs[col].append(value)
+            else:
+                for col, value in zip(transform_logs.keys(), (date, path, extension.replace(',', ''), new_path)):
+                    transform_logs[col].append(value)
+
+        except UnidentifiedImageError:
+            date = get_date()
+            error_logs['Дата обработки'].append(date)
+            error_logs['Исходный путь'].append(path)
+
+    pd.DataFrame(pass_logs).to_csv(os.path.join(logs_path, 'pass_logs.csv'))
+    pd.DataFrame(transform_logs).to_csv(os.path.join(logs_path, 'transform_logs.csv'))
+    pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
