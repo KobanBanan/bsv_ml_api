@@ -164,6 +164,11 @@ async def _convert_images(image_path: str):
         second = str(datetime.datetime.now().second)
         return day + '_' + month + '_' + year + ' ' + minute + ':' + second
 
+    image_path = '/PortfolioUpload' + image_path.split('PortfolioUpload')[1]
+
+    if not os.path.exists(image_path):
+        raise 'Переданный путь не существует!'
+
     path = Path(image_path)
     path_to_root_folder = str(path.parent.absolute())
     path_to_original_images = os.path.join(path_to_root_folder, 'original')
