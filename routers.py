@@ -4,6 +4,7 @@ from typing import Dict
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
+import asyncio
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
     _convert_images
@@ -98,7 +99,7 @@ async def convert_images(path_to_folder: str):
     Get contact prediction
     :param path_to_folder: full path to folder
     """
-    await _convert_images(path_to_folder)
+    asyncio.ensure_future(convert_images(path_to_folder))
 
 
 @router.get("/")
