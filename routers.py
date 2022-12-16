@@ -93,12 +93,12 @@ async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
 
 
 @router.post("/convert_images/")
-async def convert_images(path_to_folder: str) -> Dict[str, Dict[str, float]]:
+async def convert_images(path_to_folder: str):
     """
     Get contact prediction
     :param path_to_folder: full path to folder
     """
-    return await _convert_images(path_to_folder)
+    await _convert_images(path_to_folder)
 
 
 @router.get("/")
