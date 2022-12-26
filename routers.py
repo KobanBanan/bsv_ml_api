@@ -12,7 +12,7 @@ from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions
 router = APIRouter()
 
 
-@router.post("phone_30_seconds_predictions/", tags=["Other"])
+@router.post("/phone_30_seconds_predictions", tags=["ml"])
 async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> StreamingResponse:
     """
     Get phone success predictions
@@ -39,7 +39,7 @@ async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> Streamin
     return await _get_30_seconds_predictions(df['ClaimID'].tolist())
 
 
-@router.post("give_promise_predictions/", tags=["Other"])
+@router.post("/give_promise_predictions", tags=["ml"])
 async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -66,7 +66,7 @@ async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_give_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("keep_promise_predictions/", tags=["Other"])
+@router.post("/keep_promise_predictions", tags=["ml"])
 async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -93,7 +93,7 @@ async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_keep_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("other/convert_images/", tags=["Other"])
+@router.post("/convert_images", tags=["Other"])
 async def convert_images(path_to_folder: str):
     """
     Get contact prediction
@@ -102,10 +102,10 @@ async def convert_images(path_to_folder: str):
     asyncio.ensure_future(_convert_images(path_to_folder))
 
 
-@router.post("claim_motion_recommendation/", tags=["Other"])
+@router.post("/claim_motion_recommendation", tags=["Other"])
 async def claim_motion_recommendation(claim_ids: List[int]) -> Dict[int, str]:
     """
-    Claim motion recommendation
+    Claim motion recommendation placeholder
     :param claim_ids:
     :return:
     """
