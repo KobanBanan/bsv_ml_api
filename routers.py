@@ -1,18 +1,18 @@
+import asyncio
 from io import BytesIO
-from typing import Dict
+from typing import Dict, List
 
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
-import asyncio
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
-    _convert_images
+    _convert_images, _claim_motion_recommendation
 
 router = APIRouter()
 
 
-@router.post("/phone_30_seconds_predictions/")
+@router.post("ml/phone_30_seconds_predictions/")
 async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> StreamingResponse:
     """
     Get phone success predictions
@@ -39,7 +39,7 @@ async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> Streamin
     return await _get_30_seconds_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/give_promise_predictions/")
+@router.post("ml//give_promise_predictions/")
 async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -66,7 +66,7 @@ async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_give_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/keep_promise_predictions/")
+@router.post("ml/keep_promise_predictions/")
 async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -93,13 +93,18 @@ async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_keep_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/convert_images/")
+@router.post("other/convert_images/")
 async def convert_images(path_to_folder: str):
     """
     Get contact prediction
     :param path_to_folder: full path to folder
     """
-    asyncio.ensure_future(convert_images(path_to_folder))
+    asyncio.ensure_future(_convert_images(path_to_folder))
+
+
+@router.post("other/claim_motion_recommendation/")
+async def claim_motion_recommendation(claim_ids: List[int]):
+    return await _claim_motion_recommendation(claim_ids)
 
 
 @router.get("/")

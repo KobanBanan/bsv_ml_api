@@ -155,6 +155,7 @@ async def _convert_images(image_path: str):
     :param image_path: full path to images
     :return:
     """
+
     def get_date():
         year = str(datetime.datetime.now().year)
         month = str(datetime.datetime.now().month)
@@ -229,3 +230,12 @@ async def _convert_images(image_path: str):
     pd.DataFrame(pass_logs).to_csv(os.path.join(logs_path, 'pass_logs.csv'))
     pd.DataFrame(transform_logs).to_csv(os.path.join(logs_path, 'transform_logs.csv'))
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
+
+
+async def _claim_motion_recommendation(claim_ids: List[int]):
+    """
+    Returns claim motion recommendation placeholder
+    :param claim_ids:
+    :return:
+    """
+    return {c: 'БЕЗ ВЗАИМОДЕЙСТВИЯ' for c in claim_ids}
