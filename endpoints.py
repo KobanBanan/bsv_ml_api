@@ -6,7 +6,7 @@ import random
 import shutil
 from functools import partial, wraps
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import aioodbc
 import pandas as pd
@@ -232,7 +232,7 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _claim_motion_recommendation(claim_ids: List[int]):
+async def _claim_motion_recommendation(claim_ids: List[int]) -> Dict[int, str]:
     """
     Returns claim motion recommendation placeholder
     :param claim_ids:
