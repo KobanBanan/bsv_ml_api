@@ -241,17 +241,21 @@ async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
     easter_egg = {
         459326: {
             "claim_id": 459326,
-            "recommendation": {
+            "claim_status": "БАНК",
+            "bank_employer_details": {
                 "bank_bik": "044525974"
-
             }
         },
         2750410: {
-
             "claim_id": 2750410,
-            "recommendation": {
+            "claim_status": "РАБОТОДАТЕЛЬ",
+            "bank_employer_details": {
                 "employer_inn": "0326013767"
             }
+        },
+        3932859: {
+            "claim_id": 3932859,
+            "claim_status": "ФССП"
         }
     }
 
@@ -263,9 +267,7 @@ async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
             res.append(
                 {
                     "claim_id": claim_id,
-                    "recommendation": {
-                        "claim_status": "БЕЗ ВЗАИМОДЕЙСТВИЯ"
-                    }
+                    "claim_status": "БЕЗ ВЗАИМОДЕЙСТВИЯ"
                 }
             )
 
