@@ -12,7 +12,7 @@ from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions
 router = APIRouter()
 
 
-@router.post("/phone_30_seconds_predictions", tags=["ml"])
+@router.post("/phone_30_seconds_predictions", tags=["ML"])
 async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> StreamingResponse:
     """
     Get phone success predictions
@@ -39,7 +39,7 @@ async def phone_30_seconds_predictions(file: UploadFile = File(...)) -> Streamin
     return await _get_30_seconds_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/give_promise_predictions", tags=["ml"])
+@router.post("/give_promise_predictions", tags=["ML"])
 async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -66,7 +66,7 @@ async def give_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_give_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/keep_promise_predictions", tags=["ml"])
+@router.post("/keep_promise_predictions", tags=["ML"])
 async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Dict[str, float]]:
     """
     Get contact prediction
@@ -103,7 +103,7 @@ async def convert_images(path_to_folder: str):
 
 
 @router.post("/claim_motion_recommendation", tags=["Other"])
-async def claim_motion_recommendation(claim_ids: List[int]) -> Dict[int, str]:
+async def claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
     """
     Claim motion recommendation placeholder
     :param claim_ids:

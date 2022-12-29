@@ -232,10 +232,41 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _claim_motion_recommendation(claim_ids: List[int]) -> Dict[int, str]:
+async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
     """
     Returns claim motion recommendation placeholder
     :param claim_ids:
     :return:
     """
-    return {c: 'БЕЗ ВЗАИМОДЕЙСТВИЯ' for c in claim_ids}
+    easter_egg = {
+        459326: {
+            "claim_id": 459326,
+            "recommendation": {
+                "bank_bik": "044525974"
+
+            }
+        },
+        2750410: {
+
+            "claim_id": 2750410,
+            "recommendation": {
+                "employer_inn": "0326013767"
+            }
+        }
+    }
+
+    res = []
+    for claim_id in claim_ids:
+        if easter_egg.get(claim_id):
+            res.append(easter_egg.get(claim_id))
+        else:
+            res.append(
+                {
+                    "claim_id": claim_id,
+                    "recommendation": {
+                        "claim_status": "БЕЗ ВЗАИМОДЕЙСТВИЯ"
+                    }
+                }
+            )
+
+    return res
