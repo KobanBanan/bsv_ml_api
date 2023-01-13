@@ -256,6 +256,10 @@ async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
         3932859: {
             "claim_id": 3932859,
             "claim_status": "ФССП"
+        },
+        1570115: {
+            "claim_id": 1570115,
+            "claim_status": "ПФР"
         }
     }
 
