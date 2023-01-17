@@ -253,6 +253,46 @@ async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
                 "employer_inn": "0326013767"
             }
         },
+        3882713: {
+            "claim_id": 3882713,
+            "claim_status": "БАНК",
+            "bank_employer_details": {
+                "bank_bik": "045004774",
+                "bank_answer": {
+                    "bank_answer_mask_value": "12012023AB02",
+                    "bank_answer_mask_date": "2023-01-12"
+                }
+            }
+        },
+        3462727: {
+            "claim_id": 3462727,
+            "claim_status": "БАНК",
+            "bank_employer_details": {
+                "bank_bik": "044525416",
+                "bank_answer": {
+                    "bank_answer_mask_value": "16012023QIWI",
+                    "bank_answer_mask_date": "2023-01-16"
+                }
+            }
+        },
+        1114537: {
+            "claim_id": 1114537,
+            "claim_status": "БАНК",
+            "bank_employer_details": {
+                "bank_bik": "044525974"
+            }
+        },
+        2168562: {
+            "claim_id": 2168562,
+            "claim_status": "РАБОТОДАТЕЛЬ",
+            "bank_employer_details": {
+                "employer_inn": "4501201202"
+            }
+        },
+        35134: {
+            "claim_id": 35134,
+            "claim_status": "ФССП"
+        },
         3932859: {
             "claim_id": 3932859,
             "claim_status": "ФССП"
@@ -260,6 +300,19 @@ async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
         1570115: {
             "claim_id": 1570115,
             "claim_status": "ПФР"
+        },
+        3448311: {
+            "claim_id": 3448311,
+            "claim_status": "ДОЛГ ПОГАШЕН"
+        },
+        3974878: {
+            "claim_id": 3974878,
+            "claim_status": "ДОЛГ СПИСАН"
+        },
+        2458050: {
+            "claim_id": 2458050,
+            "claim_status": "ВЗЫСКАНИЕ НЕВОЗМОЖНО"
+
         }
     }
 
