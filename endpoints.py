@@ -234,11 +234,25 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _send_fis_request(from_date:str) -> int:
+async def _send_fis_request(from_date: str, comparison_operator:str) -> int:
     df_ = get_data()
 
     df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    df_ = df_.loc[df_['creation_datetime'] == from_date].to_dict('records')
+    if comparison_operator == '>':
+        df_ = df_.loc[df_['creation_datetime'] > from_date].to_dict('records')
+    elif comparison_operator == '<':
+        df_ = df_.loc[df_['creation_datetime'] < from_date].to_dict('records')
+    elif comparison_operator == '==':
+        df_ = df_.loc[df_['creation_datetime'] == from_date].to_dict('records')
+    elif comparison_operator == '>=':
+        df_ = df_.loc[df_['creation_datetime'] >= from_date].to_dict('records')
+    elif comparison_operator == '<=':
+        df_ = df_.loc[df_['creation_datetime'] <= from_date].to_dict('records')
+    elif comparison_operator == '!=':
+        df_ = df_.loc[df_['creation_datetime'] != from_date].to_dict('records')
+    else:
+        raise 'not supported comparison operator'
+
     res = []
     for s in df_:
 

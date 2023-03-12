@@ -102,14 +102,18 @@ async def convert_images(path_to_folder: str):
     asyncio.ensure_future(_convert_images(path_to_folder))
 
 
-@router.post("/claim_motion_recommendation", tags=["fisx"])
-async def send_fis_request(from_date: str) -> int:
+@router.post("/send_fis_request", tags=["fisx"])
+async def send_fis_request(from_date: str, comparison_operator: str) -> int:
     """
     Sent fis request
     :param from_date: date like this 2023-03-10 10:00:00
+    :param comparison_operator: comparison operator must be in  ('<', '>', '<=', '>=', '==', '!=')
     :return: Status code int
     """
-    return await _send_fis_request(from_date)
+    comparison_operator = comparison_operator.strip()
+    assert comparison_operator in ('<', '>', '<=', '>=', '==', '!='), \
+        "comparison operator must be in  ('<', '>', '<=', '>=', '==', '!=')"
+    return await _send_fis_request(from_date, comparison_operator)
 
 
 @router.get("/")
