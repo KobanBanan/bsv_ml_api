@@ -1,22 +1,24 @@
 import asyncio
 import datetime
 import io
+import json
 import os
 import random
 import shutil
 from functools import partial, wraps
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import aioodbc
 import pandas as pd
+import requests
 from PIL import Image, UnidentifiedImageError
 from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
 from consts import DEFAULT_COLUMNS
-from utils import predict, batch_iterable
+from utils import predict, batch_iterable, get_data
 
 dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
 connect = partial(aioodbc.connect, dsn=dsn, echo=True, autocommit=True)
@@ -232,100 +234,63 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
-    """
-    Returns claim motion recommendation placeholder
-    :param claim_ids:
-    :return:
-    """
-    easter_egg = {
-        459326: {
-            "claim_id": 459326,
-            "claim_status": "БАНК",
-            "bank_employer_details": {
-                "bank_bik": "044525974"
-            }
-        },
-        2750410: {
-            "claim_id": 2750410,
-            "claim_status": "РАБОТОДАТЕЛЬ",
-            "bank_employer_details": {
-                "employer_inn": "0326013767"
-            }
-        },
-        3882713: {
-            "claim_id": 3882713,
-            "claim_status": "БАНК",
-            "bank_employer_details": {
-                "bank_bik": "045004774",
-                "bank_answer": {
-                    "bank_answer_mask_value": "12012023AB02",
-                    "bank_answer_mask_date": "2023-01-12"
-                }
-            }
-        },
-        3462727: {
-            "claim_id": 3462727,
-            "claim_status": "БАНК",
-            "bank_employer_details": {
-                "bank_bik": "044525416",
-                "bank_answer": {
-                    "bank_answer_mask_value": "16012023QIWI",
-                    "bank_answer_mask_date": "2023-01-16"
-                }
-            }
-        },
-        1114537: {
-            "claim_id": 1114537,
-            "claim_status": "БАНК",
-            "bank_employer_details": {
-                "bank_bik": "044525974"
-            }
-        },
-        2168562: {
-            "claim_id": 2168562,
-            "claim_status": "РАБОТОДАТЕЛЬ",
-            "bank_employer_details": {
-                "employer_inn": "4501201202"
-            }
-        },
-        35134: {
-            "claim_id": 35134,
-            "claim_status": "ФССП"
-        },
-        3932859: {
-            "claim_id": 3932859,
-            "claim_status": "ФССП"
-        },
-        1570115: {
-            "claim_id": 1570115,
-            "claim_status": "ПФР"
-        },
-        3448311: {
-            "claim_id": 3448311,
-            "claim_status": "ДОЛГ ПОГАШЕН"
-        },
-        3974878: {
-            "claim_id": 3974878,
-            "claim_status": "ДОЛГ СПИСАН"
-        },
-        2458050: {
-            "claim_id": 2458050,
-            "claim_status": "ВЗЫСКАНИЕ НЕВОЗМОЖНО"
+async def _send_fis_request(from_date:str) -> int:
+    df_ = get_data()
 
-        }
-    }
-
+    df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    df_ = df_.loc[df_['creation_datetime'] == from_date].to_dict('records')
     res = []
-    for claim_id in claim_ids:
-        if easter_egg.get(claim_id):
-            res.append(easter_egg.get(claim_id))
-        else:
-            res.append(
+    for s in df_:
+
+        d = {
+            "qr_code": s["qr_code"],
+            "claim_status": s["claim_status"],
+            "judicial_case_details": {
+                "court_remainder": s["court_remainder"]
+            }
+        }
+
+        if s["claim_status"] == "РАБОТОДАТЕЛЬ":
+            d.update({"employer_details": {"employer_inn": s["employer_inn"]}})
+
+        if s["claim_status"] == "БАНК":
+            d.update(
                 {
-                    "claim_id": claim_id,
-                    "claim_status": "БЕЗ ВЗАИМОДЕЙСТВИЯ"
+                    "bank_details": {
+                        "bank_bik": s['bank_bik'],
+                        'bank_answer': {
+                            'bank_answer_mask_value': s.get('bank_answer_mask_value'),
+                            'bank_answer_mask_date': s.get('bank_answer_mask_date')
+                        }
+                    },
+
+                }
+            )
+        if s["claim_status"] == "ФССП":
+            d.update(
+                {
+                    "FSSP_details": {
+                        "FSSP_department_FIS_id": str(s['FSSP_department_FIS_id'])
+                    }
                 }
             )
 
-    return res
+        if s["claim_status"] == "ПФР":
+            d.update(
+                {
+                    "PFR_details": {
+                        "PFR_department_FIS_id": str(s['PFR_department_FIS_id'])
+                    }
+                }
+            )
+
+        res.append(d)
+    print(f'sending request with {res}')
+    response = requests.post(
+        'http://10.115.0.40:8080/platform/rs2/rest/endpoint/exec_document_motion',
+        headers={
+            'Content-Type': 'application/json; charset=UTF-8'},
+        json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
+
+    )
+    return response.status_code

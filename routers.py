@@ -7,7 +7,7 @@ from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
-    _convert_images, _claim_motion_recommendation
+    _convert_images, _send_fis_request
 
 router = APIRouter()
 
@@ -102,14 +102,14 @@ async def convert_images(path_to_folder: str):
     asyncio.ensure_future(_convert_images(path_to_folder))
 
 
-@router.post("/claim_motion_recommendation", tags=["Other"])
-async def claim_motion_recommendation(claim_ids: List[int]) -> List[Dict]:
+@router.post("/claim_motion_recommendation", tags=["fisx"])
+async def send_fis_request(from_date: str) -> int:
     """
-    Claim motion recommendation placeholder
-    :param claim_ids:
-    :return:
+    Sent fis request
+    :param from_date: date like this 2023-03-10 10:00:00
+    :return: Status code int
     """
-    return await _claim_motion_recommendation(claim_ids)
+    return await _send_fis_request(from_date)
 
 
 @router.get("/")
