@@ -239,6 +239,15 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
     df_ = df_.loc[df_['batch_uuid'] == batch_uuid]
     df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x).to_dict('records')
 
+    if not df_:
+
+        return {
+            "UUID": batch_uuid,
+            "timestamp": datetime.datetime.now(),
+            "num_elements": 0,
+            "status_code": 'no data by given UUID'
+        }
+
     res = []
     for s in df_:
 
