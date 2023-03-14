@@ -7,7 +7,7 @@ import random
 import shutil
 from functools import partial, wraps
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import aioodbc
 import pandas as pd
@@ -234,24 +234,10 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _send_fis_request(from_date: str, comparison_operator:str) -> int:
+async def _send_fis_request(batch_uuid: str) -> Dict:
     df_ = get_data()
-
-    df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-    if comparison_operator == '>':
-        df_ = df_.loc[df_['creation_datetime'] > from_date].to_dict('records')
-    elif comparison_operator == '<':
-        df_ = df_.loc[df_['creation_datetime'] < from_date].to_dict('records')
-    elif comparison_operator == '==':
-        df_ = df_.loc[df_['creation_datetime'] == from_date].to_dict('records')
-    elif comparison_operator == '>=':
-        df_ = df_.loc[df_['creation_datetime'] >= from_date].to_dict('records')
-    elif comparison_operator == '<=':
-        df_ = df_.loc[df_['creation_datetime'] <= from_date].to_dict('records')
-    elif comparison_operator == '!=':
-        df_ = df_.loc[df_['creation_datetime'] != from_date].to_dict('records')
-    else:
-        raise 'not supported comparison operator'
+    df_ = df_.loc[df_['batch_uuid'] == batch_uuid]
+    df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x).to_dict('records')
 
     res = []
     for s in df_:
@@ -297,6 +283,14 @@ async def _send_fis_request(from_date: str, comparison_operator:str) -> int:
                     }
                 }
             )
+        if s["claim_status"] not in ("РАБОТОДАТЕЛЬ", 'БАНК', 'ФССП', 'ПФР'):
+            d.update(
+                {
+                    "archive_storage_details": {
+                        "storage_type": s.get("archive_storage_type")
+                    }
+                }
+            )
 
         res.append(d)
     print(f'sending request with {res}')
@@ -307,4 +301,11 @@ async def _send_fis_request(from_date: str, comparison_operator:str) -> int:
         json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
 
     )
-    return response.status_code
+
+    return {
+        "UUID": batch_uuid,
+        "timestamp": datetime.datetime.now(),
+        "num_elements": len(res),
+        "status_code": response.status_code
+    }
+

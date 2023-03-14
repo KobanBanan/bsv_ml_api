@@ -93,7 +93,7 @@ async def keep_promise_predictions(file: UploadFile = File(...)) -> Dict[str, Di
     return await _get_keep_promise_predictions(df['ClaimID'].tolist())
 
 
-@router.post("/convert_images", tags=["Other"])
+@router.post("/convert_images", tags=["OTHER"])
 async def convert_images(path_to_folder: str):
     """
     Get contact prediction
@@ -102,18 +102,15 @@ async def convert_images(path_to_folder: str):
     asyncio.ensure_future(_convert_images(path_to_folder))
 
 
-@router.post("/send_fis_request", tags=["fisx"])
-async def send_fis_request(from_date: str, comparison_operator: str) -> int:
+@router.post("/send_fis_request", tags=["FIS"])
+async def send_fis_request(batch_uuid: str) -> Dict:
     """
     Sent fis request
-    :param from_date: date like this 2023-03-10 10:00:00
-    :param comparison_operator: comparison operator must be in  ('<', '>', '<=', '>=', '==', '!=')
+    :param batch_uuid: UUID like 4E13FF89-D125-47B2-A380-AE0F49BF8B32
     :return: Status code int
     """
-    comparison_operator = comparison_operator.strip()
-    assert comparison_operator in ('<', '>', '<=', '>=', '==', '!='), \
-        "comparison operator must be in  ('<', '>', '<=', '>=', '==', '!=')"
-    return await _send_fis_request(from_date, comparison_operator)
+
+    return await _send_fis_request(batch_uuid)
 
 
 @router.get("/")
