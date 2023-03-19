@@ -1,10 +1,10 @@
 import asyncio
 from io import BytesIO
 from typing import Dict, List
-
+import json
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
     _convert_images, _send_fis_request
@@ -103,14 +103,15 @@ async def convert_images(path_to_folder: str):
 
 
 @router.post("/send_fis_request", tags=["FIS"])
-async def send_fis_request(batch_uuid: str) -> Dict:
+async def send_fis_request(batch_uuid: str) -> JSONResponse:
     """
     Sent fis request
     :param batch_uuid: UUID like 4E13FF89-D125-47B2-A380-AE0F49BF8B32
     :return: Status code int
     """
-
-    return await _send_fis_request(batch_uuid)
+    res = await _send_fis_request(batch_uuid)
+    res = json.dumps(res, default=str, ensure_ascii=False)
+    return JSONResponse(content=res)
 
 
 @router.get("/")

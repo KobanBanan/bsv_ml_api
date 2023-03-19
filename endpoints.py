@@ -18,7 +18,7 @@ from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
 from consts import DEFAULT_COLUMNS
-from utils import predict, batch_iterable, get_data
+from utils import predict, batch_iterable, get_data, push_data
 
 dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
 connect = partial(aioodbc.connect, dsn=dsn, echo=True, autocommit=True)
@@ -303,6 +303,9 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
 
         res.append(d)
     print(f'sending request with {res}')
+    json_data = json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
+    batch_sent_datetime = datetime.datetime.now()
+    # response = requests.post(
     response = requests.post(
         'http://10.115.0.40:8080/platform/rs2/rest/endpoint/exec_document_motion',
         headers={
@@ -311,10 +314,16 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
 
     )
 
-    return {
-        "UUID": batch_uuid,
-        "timestamp": datetime.datetime.now(),
-        "num_elements": len(res),
-        "status_code": response.status_code
+    answer_received_datetime = datetime.datetime.now()
+    res = {
+        "batch_uuid": [batch_uuid],
+        "sent_count": [len(res)],
+        "batch_sent_datetime": [batch_sent_datetime],
+        "answer_code": [200],
+        "answer_received_datetime": [answer_received_datetime],
+        "json_data": [json_data]
     }
+    push_data(res)
+
+    return res
 
