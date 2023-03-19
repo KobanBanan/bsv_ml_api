@@ -319,7 +319,7 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
         "batch_uuid": [batch_uuid],
         "sent_count": [len(res)],
         "batch_sent_datetime": [batch_sent_datetime],
-        "answer_code": [200],
+        "answer_code": [response.status_code],
         "answer_received_datetime": [answer_received_datetime],
         "json_data": [json_data]
     }
