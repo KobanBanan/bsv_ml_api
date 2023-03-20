@@ -45,5 +45,5 @@ def push_data(data):
             "INSERT INTO buffer.FIS_push_log (batch_uuid,sent_count,batch_sent_datetime, answer_code,answer_received_datetime,json_data) values(?,?,?,?,?,?)",
             row.batch_uuid, row.sent_count, row.batch_sent_datetime, row.answer_code, row.answer_received_datetime,
             row.json_data)
-
+    curr.commit()
     cnxn.close()
