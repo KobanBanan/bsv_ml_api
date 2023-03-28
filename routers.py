@@ -143,7 +143,17 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
     :param package_id: Package id like 65728
     :return StreamingResponse to .csv
     """
-    return await _csbi_get_data(package_id)
+    result = await _csbi_get_data(package_id)
+    output = BytesIO()
+
+    with pd.ExcelWriter(output) as writer:
+        result.to_excel(writer)
+
+    headers = {
+        'Content-Disposition': 'attachment; filename="csbi.xlsx"'
+    }
+    return StreamingResponse(iter([output.getvalue()]), headers=headers)
+
 
 
 @router.get("/")
