@@ -288,7 +288,6 @@ async def _csbi_send_data(df_: pd.DataFrame, target):
         "text": ...
     }
     """
-    df_ = df_.head(10)
     data_package = []
     for index, row in tqdm(df_.iterrows()):
         data_package.append({"TARGET": [target], "ID_CONTRACT": row['ID'], "ADDRESS": row['AddressValue']})
