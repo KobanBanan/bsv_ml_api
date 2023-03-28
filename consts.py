@@ -7,3 +7,5 @@ DEFAULT_COLUMNS = ['PersonID', 'PersonAge', 'PersonGenderMale', 'PersonRegionReg
 
 CSBI_HEADERS = {'Content-type': 'application/json', 'Key': 'b49bbf90-59d0-444f-89f4-8ebec9578b67'}
 CSBI_SEND_DATA_URL = 'https://svc.csbi.ru/api/v2/query1str'
+CSBI_CHECK_PACKAGE = 'https://svc.csbi.ru/api/v2/status'
+CSBI_GET_DATA = 'https://svc.csbi.ru/api/v2/getdata'

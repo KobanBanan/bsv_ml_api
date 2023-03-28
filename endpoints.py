@@ -17,7 +17,7 @@ from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
-from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL
+from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
 from utils import predict, batch_iterable, get_data, push_data
 
 dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
@@ -280,13 +280,51 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
 
 
 async def _csbi_send_data(df_: pd.DataFrame, target):
+    """
+    :param df_: DataFrame with ID and AddressValue
+    :param target: ["COURT", "BAILIF"]
+    :return:  {
+        "status_code": ... ,
+        "text": ...
+    }
+    """
     df_ = df_.head(10)
     data_package = []
     for index, row in tqdm(df_.iterrows()):
-        data_package.append({"TARGET": [target], "ID_CONTRACT": row['ClaimID'], "ADDRESS": row['addr_bc']})
+        data_package.append({"TARGET": [target], "ID_CONTRACT": row['ID'], "ADDRESS": row['AddressValue']})
     data_packages = json.dumps(data_package, ensure_ascii=False).encode('utf8')
     req_package = requests.post(CSBI_SEND_DATA_URL, headers=CSBI_HEADERS, data=data_packages)
     return {
         "status_code": req_package.status_code,
         "text": req_package.text
     }
+
+
+async def _csbi_check_package(package_id: str) -> Dict:
+    """
+    Check package status
+    :param package_id:  Package ID
+    :return: {
+        "status_code": ... ,
+        "text": ...
+    }
+    """
+    data = json.dumps({"PACKAGE_ID": package_id})
+    req_package = requests.post(CSBI_CHECK_PACKAGE, headers=CSBI_HEADERS, data=data)
+    return {
+        "status_code": req_package.status_code,
+        "text": req_package.text
+    }
+
+
+async def _csbi_get_data(package_id):
+    """
+    Get CSBI data by package_id
+    :param package_id: Package id like 65728
+    :return: pd.DataFrame with package data
+    """
+    package_id = json.dumps({"PACKAGE_ID": package_id})
+    req_package_id = requests.post(CSBI_GET_DATA, headers=CSBI_HEADERS, data=package_id)
+    data_df = pd.DataFrame(json.loads(req_package_id.text))
+    data_df['package_id'] = package_id
+    return data_df

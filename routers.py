@@ -7,7 +7,7 @@ from fastapi import APIRouter, UploadFile, File, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
-    _convert_images, _send_fis_request, _csbi_send_data
+    _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data
 
 router = APIRouter()
 
@@ -118,13 +118,32 @@ async def send_fis_request(batch_uuid: str) -> JSONResponse:
 async def csbi_send_data(file: UploadFile = File(...), target: str = Query("target", enum=["COURT", "BAILIF"])) -> Dict:
     """
     Sent batch to csbi
-    :param target: enum=["COURT", "BAILIF"]
-    :param file: excel file
+    :param target: Enum=["COURT", "BAILIF"]
+    :param file: Excel file with ID and AddressValue columns
     """
     contents = file.file.read()
     buffer = BytesIO(contents)
     df = pd.read_excel(buffer, engine='openpyxl')
     return await _csbi_send_data(df, target)
+
+
+@router.post("/csbi_check_package", tags=["CSBI"])
+async def csbi_check_package(package_id: str) -> Dict:
+    """
+    Check package id status
+    :param package_id: Package id like 65728
+    """
+    return await _csbi_check_package(package_id)
+
+
+@router.post("/csbi_get_data", tags=["CSBI"])
+async def csbi_get_data(package_id: str) -> StreamingResponse:
+    """
+    Get data by package id
+    :param package_id: Package id like 65728
+    :return StreamingResponse to .csv
+    """
+    return await _csbi_get_data(package_id)
 
 
 @router.get("/")
