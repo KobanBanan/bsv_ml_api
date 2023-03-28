@@ -3,11 +3,11 @@ from io import BytesIO
 from typing import Dict, List
 import json
 import pandas as pd
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
-    _convert_images, _send_fis_request
+    _convert_images, _send_fis_request, _csbi_send_data
 
 router = APIRouter()
 
@@ -112,6 +112,19 @@ async def send_fis_request(batch_uuid: str) -> JSONResponse:
     res = await _send_fis_request(batch_uuid)
     res = json.dumps(res, default=str, ensure_ascii=False)
     return JSONResponse(content=res)
+
+
+@router.post("/csbi_send_data", tags=["CSBI"])
+async def csbi_send_data(file: UploadFile = File(...), target: str = Query("target", enum=["COURT", "BAILIF"])) -> Dict:
+    """
+    Sent batch to csbi
+    :param target: enum=["COURT", "BAILIF"]
+    :param file: excel file
+    """
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+    return await _csbi_send_data(df, target)
 
 
 @router.get("/")

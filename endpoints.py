@@ -17,7 +17,7 @@ from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
-from consts import DEFAULT_COLUMNS
+from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL
 from utils import predict, batch_iterable, get_data, push_data
 
 dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
@@ -45,9 +45,8 @@ def clear_buffer_table(file_name: str, return_response=True):
 
 
 @clear_buffer_table('30_seconds_predictions')
-async def _get_30_seconds_predictions(
-        ids: List[int], model: CatBoostClassifier = CatBoostClassifier().load_model('models/m30s.cbm')
-):
+async def _get_30_seconds_predictions(ids: List[int],
+                                      model: CatBoostClassifier = CatBoostClassifier().load_model('models/m30s.cbm')):
     """
     Get phone 30 seconds call success predictions
     :param ids: List[1,2,3,4]
@@ -72,9 +71,8 @@ async def _get_30_seconds_predictions(
             return predict(pd.DataFrame.from_records(val, columns=DEFAULT_COLUMNS).dropna(), model)
 
 
-async def _promise_predictions(
-        ids: List[int], model: CatBoostClassifier = CatBoostClassifier().load_model('models/mgp.cbm')
-):
+async def _promise_predictions(ids: List[int],
+                               model: CatBoostClassifier = CatBoostClassifier().load_model('models/mgp.cbm')):
     """
     Get contact predictions
     :param model:
@@ -101,25 +99,21 @@ async def _promise_predictions(
 
 
 @clear_buffer_table('give_promise_predictions')
-async def _get_give_promise_predictions(
-        ids: List[int],
-        model: CatBoostClassifier = CatBoostClassifier().load_model('models/mgp.cbm')
-):
+async def _get_give_promise_predictions(ids: List[int],
+                                        model: CatBoostClassifier = CatBoostClassifier().load_model('models/mgp.cbm')):
     return await _promise_predictions(ids, model)
 
 
 @clear_buffer_table('give_promise_predictions', False)
-async def _get_give_promise_predictions_no_response(
-        ids: List[int],
-        model: CatBoostClassifier = CatBoostClassifier().load_model('models/mgp.cbm')
-):
+async def _get_give_promise_predictions_no_response(ids: List[int],
+                                                    model: CatBoostClassifier = CatBoostClassifier().load_model(
+                                                        'models/mgp.cbm')):
     return await _promise_predictions(ids, model)
 
 
 @clear_buffer_table('keep_promise_predictions')
-async def _get_keep_promise_predictions(
-        ids: List[int], model: CatBoostClassifier = CatBoostClassifier().load_model('models/mkp.cbm')
-):
+async def _get_keep_promise_predictions(ids: List[int],
+                                        model: CatBoostClassifier = CatBoostClassifier().load_model('models/mkp.cbm')):
     """
     Get contact predictions
     :param ids: List[1,2,3,4]
@@ -211,8 +205,7 @@ async def _convert_images(image_path: str):
             img.close()
 
             if extension != '.jpg':
-                shutil.move(path, path_to_original_images)
-                # os.remove(path)
+                shutil.move(path, path_to_original_images)  # os.remove(path)
 
             new_name = new_path.split('/')[-1]
             date = get_date()
@@ -240,90 +233,60 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
     df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x).to_dict('records')
 
     if not df_:
-
-        return {
-            "UUID": batch_uuid,
-            "timestamp": datetime.datetime.now(),
-            "num_elements": 0,
-            "status_code": 'no data by given UUID'
-        }
+        return {"UUID": batch_uuid, "timestamp": datetime.datetime.now(), "num_elements": 0,
+                "status_code": 'no data by given UUID'}
 
     res = []
     for s in df_:
 
-        d = {
-            "qr_code": s["qr_code"],
-            "claim_status": s["claim_status"],
-            "judicial_case_details": {
-                "court_remainder": s["court_remainder"]
-            }
-        }
+        d = {"qr_code": s["qr_code"], "claim_status": s["claim_status"],
+             "judicial_case_details": {"court_remainder": s["court_remainder"]}}
 
         if s["claim_status"] == "РАБОТОДАТЕЛЬ":
             d.update({"employer_details": {"employer_inn": s["employer_inn"]}})
 
         if s["claim_status"] == "БАНК":
-            d.update(
-                {
-                    "bank_details": {
-                        "bank_bik": s['bank_bik'],
-                        'bank_answer': {
-                            'bank_answer_mask_value': s.get('bank_answer_mask_value'),
-                            'bank_answer_mask_date': s.get('bank_answer_mask_date')
-                        }
-                    },
+            d.update({"bank_details": {"bank_bik": s['bank_bik'],
+                                       'bank_answer': {'bank_answer_mask_value': s.get('bank_answer_mask_value'),
+                                                       'bank_answer_mask_date': s.get('bank_answer_mask_date')}},
 
-                }
-            )
+                      })
         if s["claim_status"] == "ФССП":
-            d.update(
-                {
-                    "FSSP_details": {
-                        "FSSP_department_FIS_id": str(s['FSSP_department_FIS_id'])
-                    }
-                }
-            )
+            d.update({"FSSP_details": {"FSSP_department_FIS_id": str(s['FSSP_department_FIS_id'])}})
 
         if s["claim_status"] == "ПФР":
-            d.update(
-                {
-                    "PFR_details": {
-                        "PFR_department_FIS_id": str(s['PFR_department_FIS_id'])
-                    }
-                }
-            )
+            d.update({"PFR_details": {"PFR_department_FIS_id": str(s['PFR_department_FIS_id'])}})
         if s["claim_status"] not in ("РАБОТОДАТЕЛЬ", 'БАНК', 'ФССП', 'ПФР'):
-            d.update(
-                {
-                    "archive_storage_details": {
-                        "storage_type": s.get("archive_storage_type")
-                    }
-                }
-            )
+            d.update({"archive_storage_details": {"storage_type": s.get("archive_storage_type")}})
 
         res.append(d)
     print(f'sending request with {res}')
     json_data = json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
     batch_sent_datetime = datetime.datetime.now()
     # response = requests.post(
-    response = requests.post(
-        'http://10.115.0.40:8080/platform/rs2/rest/endpoint/exec_document_motion',
-        headers={
-            'Content-Type': 'application/json; charset=UTF-8'},
-        json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
+    response = requests.post('http://10.115.0.40:8080/platform/rs2/rest/endpoint/exec_document_motion',
+                             headers={'Content-Type': 'application/json; charset=UTF-8'},
+                             json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
 
-    )
+                             )
 
     answer_received_datetime = datetime.datetime.now()
-    res = {
-        "batch_uuid": [batch_uuid],
-        "sent_count": [len(res)],
-        "batch_sent_datetime": [batch_sent_datetime],
-        "answer_code": [response.status_code],
-        "answer_received_datetime": [answer_received_datetime],
-        "json_data": [json_data]
-    }
+    res = {"batch_uuid": [batch_uuid], "sent_count": [len(res)], "batch_sent_datetime": [batch_sent_datetime],
+           "answer_code": [response.status_code], "answer_received_datetime": [answer_received_datetime],
+           "json_data": [json_data]}
     push_data(res)
 
     return res
 
+
+async def _csbi_send_data(df_: pd.DataFrame, target):
+    df_ = df_.head(10)
+    data_package = []
+    for index, row in tqdm(df_.iterrows()):
+        data_package.append({"TARGET": [target], "ID_CONTRACT": row['ClaimID'], "ADDRESS": row['addr_bc']})
+    data_packages = json.dumps(data_package, ensure_ascii=False).encode('utf8')
+    req_package = requests.post(CSBI_SEND_DATA_URL, headers=CSBI_HEADERS, data=data_packages)
+    return {
+        "status_code": req_package.status_code,
+        "text": req_package.text
+    }
