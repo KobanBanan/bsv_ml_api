@@ -325,6 +325,8 @@ async def _csbi_get_data(package_id):
     """
     package_id = json.dumps({"PACKAGE_ID": package_id})
     req_package_id = requests.post(CSBI_GET_DATA, headers=CSBI_HEADERS, data=package_id)
-    data_df = pd.DataFrame(json.loads(req_package_id.text))
+    data = json.loads(req_package_id.text)
+    print(data)
+    data_df = pd.DataFrame(data)
     data_df['package_id'] = package_id
     return data_df
