@@ -155,7 +155,6 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
     return StreamingResponse(iter([output.getvalue()]), headers=headers)
 
 
-
 @router.get("/")
 async def ok():
     return True

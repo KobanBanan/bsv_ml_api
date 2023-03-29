@@ -20,7 +20,8 @@ from tqdm import tqdm
 from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
 from utils import predict, batch_iterable, get_data, push_data
 
-dsn = 'Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;TrustServerCertificate=yes'
+dsn = "Driver=ODBC Driver 18 for SQL Server;Server=10.168.4.148;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;" \
+      "TrustServerCertificate=yes"
 connect = partial(aioodbc.connect, dsn=dsn, echo=True, autocommit=True)
 
 
