@@ -150,7 +150,7 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
         result.to_excel(writer)
 
     headers = {
-        'Content-Disposition': 'attachment; filename="csbi.xlsx"'
+        'Content-Disposition': 'attachment; filename="csbi.csv"'
     }
     return StreamingResponse(iter([output.getvalue()]), headers=headers)
 
