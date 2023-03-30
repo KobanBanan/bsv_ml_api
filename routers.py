@@ -147,7 +147,7 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
     output = BytesIO()
 
     with pd.ExcelWriter(output) as writer:
-        result.to_excel(writer)
+        result.to_csv(writer)
 
     headers = {
         'Content-Disposition': 'attachment; filename="csbi.csv"'
