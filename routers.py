@@ -149,7 +149,7 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
     return StreamingResponse(
         iter([df.to_csv(index=False)]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=csbi.csv"}
+        headers={f"Content-Disposition": f"attachment; filename=csbi_{package_id}.csv"}
     )
 
 
