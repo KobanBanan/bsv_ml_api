@@ -115,7 +115,10 @@ async def send_fis_request(batch_uuid: str) -> JSONResponse:
 
 
 @router.post("/csbi_send_data", tags=["CSBI"])
-async def csbi_send_data(file: UploadFile = File(...), target: str = Query("target", enum=["COURT", "BAILIFF"])) -> Dict:
+async def csbi_send_data(
+        file: UploadFile = File(...),
+        target: str = Query("target", enum=["COURT", "BAILIFF", "MAGISTRATE"])
+) -> Dict:
     """
     Sent batch to csbi
     :param target: Enum=["COURT", "BAILIF"]
