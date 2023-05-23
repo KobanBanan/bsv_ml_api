@@ -149,11 +149,13 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
 
     df = await _csbi_get_data(package_id)
 
-    return StreamingResponse(
+    response = StreamingResponse(
         iter([df.to_csv(index=False)]),
-        media_type="text/csv",
-        headers={f"Content-Disposition": f"attachment; filename=csbi_{package_id}.csv"}
+        media_type="application/octet-stream",
     )
+    response.headers["Content-Disposition"] = f"attachment; filename=csbi_{package_id}.csv"
+
+    return response
 
 
 @router.get("/")
