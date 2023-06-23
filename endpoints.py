@@ -241,6 +241,7 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
     for s in df_:
 
         d = {"qr_code": s["qr_code"], "claim_status": s["claim_status"],
+             "FIS_verified_document_id": s["FIS_verified_document_id"],
              "judicial_case_details": {"court_remainder": s["court_remainder"]}}
 
         if s["claim_status"] == "РАБОТОДАТЕЛЬ":
