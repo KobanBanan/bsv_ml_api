@@ -6,7 +6,7 @@ from catboost import CatBoostClassifier
 
 from consts import PERSON_ID
 
-server = '10.168.4.148'
+server = '10.115.0.64'
 database = 'ML'
 username = 'fronzilla'
 password = 'GP8_4z8%8r++'
