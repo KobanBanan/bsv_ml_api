@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
     _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data
-
+from consts import RECOMMENDATIONS, EXEC_DOCUMENT_MOTION
 router = APIRouter()
 
 
@@ -104,13 +104,17 @@ async def convert_images(path_to_folder: str):
 
 
 @router.post("/send_fis_request", tags=["FIS"])
-async def send_fis_request(batch_uuid: str) -> JSONResponse:
+async def send_fis_request(
+        batch_uuid: str,
+        endpoint: str = Query("endpoint", enum=[EXEC_DOCUMENT_MOTION, RECOMMENDATIONS])
+) -> JSONResponse:
     """
     Sent fis request
+    :param endpoint: target endpoint
     :param batch_uuid: UUID like 4E13FF89-D125-47B2-A380-AE0F49BF8B32
     :return: Status code int
     """
-    res = await _send_fis_request(batch_uuid)
+    res = await _send_fis_request(batch_uuid, endpoint)
     res = json.dumps(res, default=str, ensure_ascii=False)
     return JSONResponse(content=res)
 

@@ -228,7 +228,7 @@ async def _convert_images(image_path: str):
     pd.DataFrame(error_logs).to_csv(os.path.join(logs_path, 'error_logs.csv'))
 
 
-async def _send_fis_request(batch_uuid: str) -> Dict:
+async def _send_fis_request(batch_uuid: str, endpoint: str) -> Dict:
     df_ = get_data()
     df_ = df_.loc[df_['batch_uuid'] == batch_uuid]
     df_ = df_.applymap(lambda x: x.strip() if isinstance(x, str) else x).to_dict('records')
@@ -265,7 +265,7 @@ async def _send_fis_request(batch_uuid: str) -> Dict:
     print(f'sending request with {res}')
     json_data = json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8')
     batch_sent_datetime = datetime.datetime.now()
-    response = requests.post('http://10.115.0.40:8080/platform/rs2/rest/endpoint/exec_document_motion',
+    response = requests.post(endpoint,
                              headers={'Content-Type': 'application/json; charset=UTF-8'},
                              json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8'),
                              timeout=(60, 180)
