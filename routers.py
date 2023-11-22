@@ -107,7 +107,7 @@ async def convert_images(path_to_folder: str):
 @router.post("/send_fis_request", tags=["FIS"])
 async def send_fis_request(
         batch_uuid: str,
-        endpoint: str = Query("endpoint", default=EXEC_DOCUMENT_MOTION, enum=[EXEC_DOCUMENT_MOTION, RECOMMENDATIONS])
+        endpoint: str = Query(default=EXEC_DOCUMENT_MOTION, enum=[EXEC_DOCUMENT_MOTION, RECOMMENDATIONS])
 ) -> JSONResponse:
     """
     Sent fis request
