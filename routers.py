@@ -7,9 +7,10 @@ import pandas as pd
 from fastapi import APIRouter, UploadFile, File, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 
+from consts import RECOMMENDATIONS, EXEC_DOCUMENT_MOTION
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
     _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data
-from consts import RECOMMENDATIONS, EXEC_DOCUMENT_MOTION
+
 router = APIRouter()
 
 
@@ -106,7 +107,7 @@ async def convert_images(path_to_folder: str):
 @router.post("/send_fis_request", tags=["FIS"])
 async def send_fis_request(
         batch_uuid: str,
-        endpoint: str = Query("endpoint", enum=[EXEC_DOCUMENT_MOTION, RECOMMENDATIONS])
+        endpoint: str = Query("endpoint", default=EXEC_DOCUMENT_MOTION, enum=[EXEC_DOCUMENT_MOTION, RECOMMENDATIONS])
 ) -> JSONResponse:
     """
     Sent fis request
