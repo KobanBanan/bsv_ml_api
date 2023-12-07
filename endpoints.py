@@ -273,8 +273,8 @@ async def _send_fis_request(batch_uuid: str, endpoint: str) -> Dict:
                              )
 
     answer_received_datetime = datetime.datetime.now()
-    res = {"batch_uuid": [batch_uuid], "sent_count": [len(res)], "batch_sent_datetime": [batch_sent_datetime],
-           "answer_code": [response.status_code], "answer_received_datetime": [answer_received_datetime],
+    res = {"batch_uuid": [batch_uuid], "sent_count": [len(res)], "batch_sent_datetime": [str(batch_sent_datetime)],
+           "answer_code": [response.status_code], "answer_received_datetime": [str(answer_received_datetime)],
            "json_data": [json_data]}
     push_data(res)
 
