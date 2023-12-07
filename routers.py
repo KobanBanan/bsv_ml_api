@@ -115,7 +115,7 @@ async def send_fis_request(
     :param batch_uuid: UUID like 4E13FF89-D125-47B2-A380-AE0F49BF8B32
     :return: Status code int
     """
-    res = await _send_fis_request(batch_uuid, endpoint) if endpoint == EXEC_DOCUMENT_MOTION \
+    res = await _send_fis_request(batch_uuid, endpoint) if endpoint == RECOMMENDATIONS \
         else json.dumps(await _send_fis_request(batch_uuid, endpoint), ensure_ascii=False)
     return JSONResponse(content=res)
 
