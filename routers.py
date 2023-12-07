@@ -116,7 +116,7 @@ async def send_fis_request(
     :return: Status code int
     """
     res = await _send_fis_request(batch_uuid, endpoint)
-    res = json.dumps(res, default=str, ensure_ascii=False)
+    res = json.dumps(res, ensure_ascii=False)
     return JSONResponse(content=res)
 
 
