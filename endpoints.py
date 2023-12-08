@@ -17,7 +17,7 @@ from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
-from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
+from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, RECOMMENDATIONS, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
 from utils import predict, batch_iterable, get_data, push_data
 
 dsn = "Driver=ODBC Driver 18 for SQL Server;Server=10.115.0.64;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;" \
@@ -267,7 +267,7 @@ async def _send_fis_request(batch_uuid: str, endpoint: str) -> Dict:
     batch_sent_datetime = datetime.datetime.now()
     response = requests.post(endpoint,
                              headers={'Content-Type': 'application/json; charset=UTF-8'},
-                             json=json.loads(json_data),
+                             json=json.loads(json_data) if endpoint == RECOMMENDATIONS else json_data,
                              timeout=(60, 180)
                              )
 
