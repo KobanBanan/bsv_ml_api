@@ -269,7 +269,6 @@ async def _send_fis_request(batch_uuid: str, endpoint: str) -> Dict:
                              headers={'Content-Type': 'application/json; charset=UTF-8'},
                              json=json.dumps(res, ensure_ascii=False, default=str).encode('utf8').decode('utf8'),
                              timeout=(60, 180)
-
                              )
 
     answer_received_datetime = datetime.datetime.now()
@@ -277,7 +276,7 @@ async def _send_fis_request(batch_uuid: str, endpoint: str) -> Dict:
            "answer_code": [response.status_code], "answer_received_datetime": [str(answer_received_datetime)],
            "json_data": [json_data]}
     push_data(res)
-
+    res['json_data'] = [json.loads(json_data)]
     return res
 
 
