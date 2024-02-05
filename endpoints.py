@@ -293,7 +293,7 @@ async def _csbi_send_data(df_: pd.DataFrame, target):
     for index, row in tqdm(df_.iterrows()):
         data_package.append({"TARGET": [target], "ID_CONTRACT": row['ID'], "ADDRESS": row['AddressValue']})
     data_packages = json.dumps(data_package, ensure_ascii=False).encode('utf8')
-    req_package = requests.post(CSBI_SEND_DATA_URL, headers=CSBI_HEADERS, data=data_packages)
+    req_package = requests.post(CSBI_SEND_DATA_URL, headers=CSBI_HEADERS, data=data_packages, timeout=120)
     return {
         "status_code": req_package.status_code,
         "text": req_package.text
