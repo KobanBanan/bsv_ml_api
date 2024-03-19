@@ -9,7 +9,8 @@ from fastapi.responses import StreamingResponse, JSONResponse
 
 from consts import RECOMMENDATIONS, EXEC_DOCUMENT_MOTION
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
-    _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data
+    _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data, \
+    _get_claim_motion_recommendation
 
 router = APIRouter()
 
@@ -160,6 +161,27 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
         media_type="application/octet-stream",
     )
     response.headers["Content-Disposition"] = f"attachment; filename=csbi_{package_id}.csv"
+
+    return response
+
+
+@router.post("/get_claim_motion_recommendation", tags=["CSBI"])
+async def get_claim_motion_recommendation(file: UploadFile = File(...)) -> StreamingResponse:
+    """
+    Sent batch to csbi
+    :param target: Enum=["COURT", "BAILIF"]
+    :param file: Excel file with ID and AddressValue columns
+    """
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+    result = await _get_claim_motion_recommendation(df)
+
+    response = StreamingResponse(
+        iter([result.to_csv(index=False)]),
+        media_type="application/octet-stream",
+    )
+    response.headers["Content-Disposition"] = f"attachment; filename=claim_motion_recommendation.csv"
 
     return response
 

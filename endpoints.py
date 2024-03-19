@@ -329,3 +329,17 @@ async def _csbi_get_data(package_id):
     data_df = pd.DataFrame(data)
     data_df['package_id'] = package_id
     return data_df
+
+
+async def _get_claim_motion_recommendation(df_: pd.DataFrame):
+    claim_ids = df_['ClaimID'].to_list()
+    result = []
+    for claim_id in claim_ids:
+        sql = f'SELECT underhood.get_claim_motion_recommendation ({claim_id})'
+        async with connect(loop=asyncio.get_event_loop()) as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql)
+                val = await cur.fetchall()
+                result.append((claim_id, val))
+
+    return pd.DataFrame(result, columns=['ClaimID', 'predict'])
