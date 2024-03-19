@@ -167,11 +167,7 @@ async def csbi_get_data(package_id: str) -> StreamingResponse:
 
 @router.post("/get_claim_motion_recommendation", tags=["CSBI"])
 async def get_claim_motion_recommendation(file: UploadFile = File(...)) -> StreamingResponse:
-    """
-    Sent batch to csbi
-    :param target: Enum=["COURT", "BAILIF"]
-    :param file: Excel file with ID and AddressValue columns
-    """
+    """ Excel with claim_id column """
     contents = file.file.read()
     buffer = BytesIO(contents)
     df = pd.read_excel(buffer, engine='openpyxl')
