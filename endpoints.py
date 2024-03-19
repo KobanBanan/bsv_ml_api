@@ -332,14 +332,20 @@ async def _csbi_get_data(package_id):
 
 
 async def _get_claim_motion_recommendation(df_: pd.DataFrame):
-    claim_ids = df_['ClaimID'].to_list()
+    claim_ids = df_['claim_id'].to_list()
     result = []
     for claim_id in claim_ids:
         sql = f'SELECT underhood.get_claim_motion_recommendation ({claim_id})'
-        async with connect(loop=asyncio.get_event_loop()) as conn:
-            async with conn.cursor() as cur:
-                await cur.execute(sql)
-                val = await cur.fetchall()
-                result.append((claim_id, val))
+        try:
+            async with connect(loop=asyncio.get_event_loop()) as conn:
+                async with conn.cursor() as cur:
+                    await cur.execute(sql)
+                    val = await cur.fetchall()
+                    result.append((claim_id, val[0][0]))
+        except Exception as e:
+            # Handle the exception as you see fit (e.g., logging, appending an error message, etc.)
+            print(f"Error processing claim_id {claim_id}: {e}")
+            # You can decide to append a specific value (e.g., None or 'Error') if there's an error
+            result.append((claim_id, 'Error'))
 
-    return pd.DataFrame(result, columns=['ClaimID', 'predict'])
+    return pd.DataFrame(result, columns=['claim_id', 'predict'])
