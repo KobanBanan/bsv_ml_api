@@ -55,9 +55,9 @@ def push_data(data):
 def make_api_request(id_value, address, debt_amount, api_key):
     headers = {'Content-Type': 'application/json'}
     payload = {
-        'API ключ': api_key,
-        'Адрес': address,
-        'Сумма долга': debt_amount
+        'apiKey': api_key,
+        'address': address,
+        'debtRUR': debt_amount
     }
 
     response = requests.post(FSSP_DEPARTMENT_LDC, json=payload, headers=headers)
@@ -76,7 +76,7 @@ def create_requests(df, api_key):
 
     # Function to process each record in parallel
     def process_record(record):
-        id_value, address, debt_amount = record['ID'], record['AddressValue'], record['court_remainder']
+        id_value, address, debt_amount = record['id'], record['address_value'], record['court_remainder']
         return make_api_request(id_value, address, debt_amount, api_key)
 
     # Use ThreadPoolExecutor to make requests in parallel
@@ -89,9 +89,9 @@ def create_requests(df, api_key):
                 results.append(result)
 
     # Creating a new DataFrame from results
-    results_df = pd.DataFrame(results, columns=['ID', 'API_Result'])
+    results_df = pd.DataFrame(results, columns=['id', 'result'])
 
     # Merging results back with the original DataFrame on ID
-    merged_df = pd.merge(df, results_df, on='ID', how='left')
+    merged_df = pd.merge(df, results_df, on='id', how='left')
 
     return merged_df
