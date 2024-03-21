@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from consts import RECOMMENDATIONS, EXEC_DOCUMENT_MOTION
 from endpoints import _get_30_seconds_predictions, _get_give_promise_predictions, _get_keep_promise_predictions, \
     _convert_images, _send_fis_request, _csbi_send_data, _csbi_check_package, _csbi_get_data, \
-    _get_claim_motion_recommendation
+    _get_claim_motion_recommendation, _get_fssp_department_ldc
 
 router = APIRouter()
 
@@ -178,6 +178,24 @@ async def get_claim_motion_recommendation(file: UploadFile = File(...)) -> Strea
         media_type="application/octet-stream",
     )
     response.headers["Content-Disposition"] = f"attachment; filename=claim_motion_recommendation.csv"
+
+    return response
+
+
+@router.post("/get_fssp_department_ldc", tags=["FSSP"])
+async def get_fssp_department_ldc(file: UploadFile = File(...)) -> StreamingResponse:
+    """ """
+    contents = file.file.read()
+    buffer = BytesIO(contents)
+    df = pd.read_excel(buffer, engine='openpyxl')
+
+    result = await _get_fssp_department_ldc(df)
+
+    response = StreamingResponse(
+        iter([result.to_csv(index=False)]),
+        media_type="application/octet-stream",
+    )
+    response.headers["Content-Disposition"] = f"attachment; filename=fssp_department_ldc.csv"
 
     return response
 

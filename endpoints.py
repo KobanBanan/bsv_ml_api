@@ -17,8 +17,9 @@ from catboost import CatBoostClassifier
 from fastapi.responses import StreamingResponse
 from tqdm import tqdm
 
-from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, RECOMMENDATIONS, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
-from utils import predict, batch_iterable, get_data, push_data
+from consts import DEFAULT_COLUMNS, CSBI_HEADERS, CSBI_SEND_DATA_URL, KEY, \
+    RECOMMENDATIONS, CSBI_CHECK_PACKAGE, CSBI_GET_DATA
+from utils import predict, batch_iterable, get_data, push_data, create_requests
 
 dsn = "Driver=ODBC Driver 18 for SQL Server;Server=10.115.0.64;Database=ML;UID=fronzilla;PWD=GP8_4z8%8r++;" \
       "TrustServerCertificate=yes"
@@ -349,3 +350,7 @@ async def _get_claim_motion_recommendation(df_: pd.DataFrame):
             result.append((claim_id, 'Error'))
 
     return pd.DataFrame(result, columns=['claim_id', 'predict'])
+
+
+def _get_fssp_department_ldc(df):
+    return create_requests(df, KEY)
