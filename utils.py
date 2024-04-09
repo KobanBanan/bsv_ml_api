@@ -70,19 +70,19 @@ def make_api_request(id_value, address, debt_amount, api_key):
 def extract_info(data_):
     id_, data = data_
     # Extracting values from the 'request' block
-    request_block = data.get('request', {})
+    request_block = data.get('request', {}) or {}
     request_id = request_block.get('requestId', None)
     address = request_block.get('address', None)
     full_address = request_block.get('fullAddress', None)
 
     # Extracting values from the 'resultInfo' block
-    result_info_block = data.get('resultInfo', {})
+    result_info_block = data.get('resultInfo', {}) or {}
     code = result_info_block.get('code', None)
     short_name = result_info_block.get('shortName', None)
     human_description = result_info_block.get('humanDescription', None)
 
     # Extracting values from the 'court' block, then from its 'fssp' sub-block
-    court_block = data.get('court', {})
+    court_block = data.get('court', {}) or {}
     fssp_block = court_block.get('fssp', {})
     fssp_code = fssp_block.get('code', None)
     fssp_name = fssp_block.get('name', None)
