@@ -60,7 +60,7 @@ def make_api_request(id_value, address, debt_amount, api_key):
         'Сумма долга': debt_amount
     }
 
-    response = requests.post(FSSP_DEPARTMENT_LDC, json=payload, headers=headers)
+    response = requests.post(FSSP_DEPARTMENT_LDC, json=payload, headers=headers,  timeout=(60, 180))
     if response.status_code == 400:
         return id_value, None  # Or handle it in a way that fits the application logic
 
