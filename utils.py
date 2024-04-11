@@ -55,9 +55,9 @@ def push_data(data):
 def make_api_request(id_value, address, debt_amount, api_key):
     headers = {'Content-Type': 'application/json'}
     payload = {
-        'API ключ': api_key,
-        'Адрес': address,
-        'Сумма долга': debt_amount
+        'apiKey': api_key,
+        'address': address,
+        'debtRUR': debt_amount
     }
 
     response = requests.post(FSSP_DEPARTMENT_LDC, json=payload, headers=headers,  timeout=(60, 180))
@@ -65,6 +65,33 @@ def make_api_request(id_value, address, debt_amount, api_key):
         return id_value, None  # Or handle it in a way that fits the application logic
 
     return id_value, response.json()
+
+
+def extract_info(data_):
+    id_, data = data_
+    # Extracting values from the 'request' block
+    request_block = data.get('request', {}) or {}
+    request_id = request_block.get('requestId', None)
+    address = request_block.get('address', None)
+    full_address = request_block.get('fullAddress', None)
+
+    # Extracting values from the 'resultInfo' block
+    result_info_block = data.get('resultInfo', {}) or {}
+    code = result_info_block.get('code', None)
+    short_name = result_info_block.get('shortName', None)
+    human_description = result_info_block.get('humanDescription', None)
+
+    # Extracting values from the 'court' block, then from its 'fssp' sub-block
+    court_block = data.get('court', {}) or {}
+    fssp_block = court_block.get('fssp', {})
+    fssp_code = fssp_block.get('code', None)
+    fssp_name = fssp_block.get('name', None)
+
+    return {
+        'id': id_, 'request_id': request_id, 'address': address, 'short_name': short_name,
+        'full_address': full_address, 'code': code, 'human_description': human_description,
+        'fssp_code': fssp_code, 'fssp_name': fssp_name
+    }
 
 
 def create_requests(df, api_key):
@@ -76,7 +103,7 @@ def create_requests(df, api_key):
 
     # Function to process each record in parallel
     def process_record(record):
-        id_value, address, debt_amount = record['ID'], record['AddressValue'], record['court_remainder']
+        id_value, address, debt_amount = record['id'], record['address_value'], record['court_remainder']
         return make_api_request(id_value, address, debt_amount, api_key)
 
     # Use ThreadPoolExecutor to make requests in parallel
@@ -86,12 +113,12 @@ def create_requests(df, api_key):
         for future in concurrent.futures.as_completed(future_to_record):
             result = future.result()
             if result:
-                results.append(result)
+                results.append(extract_info(result))
 
     # Creating a new DataFrame from results
-    results_df = pd.DataFrame(results, columns=['ID', 'API_Result'])
+    results_df = pd.DataFrame(results)
 
     # Merging results back with the original DataFrame on ID
-    merged_df = pd.merge(df, results_df, on='ID', how='left')
+    merged_df = pd.merge(df, results_df, on='id', how='left')
 
     return merged_df

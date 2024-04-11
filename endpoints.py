@@ -352,5 +352,5 @@ async def _get_claim_motion_recommendation(df_: pd.DataFrame):
     return pd.DataFrame(result, columns=['claim_id', 'predict'])
 
 
-def _get_fssp_department_ldc(df):
+async def _get_fssp_department_ldc(df):
     return create_requests(df, KEY)
